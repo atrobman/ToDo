@@ -288,6 +288,7 @@ class Gui(QMainWindow):
     def __init__(self, app):
         super().__init__()
         self.app = app
+        self.filepath = None
 
         file = QFile(":/dark.qss")
         file.open(QFile.ReadOnly | QFile.Text)
@@ -312,10 +313,14 @@ class Gui(QMainWindow):
         bar = self.menuBar()
         file = bar.addMenu("File")
             
-        save_action = QAction("Save",self)
+        save_as_action = QAction("Save as",self)
+        save_as_action.setShortcut("Ctrl+Shift+S")
+        save_as_action.triggered.connect(self.save_as_tree)
+        
+        save_action = QAction("Save", self)
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self.save_tree)
-        
+
         open_action = QAction("Open",self)
         open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self.open_tree)
@@ -325,6 +330,7 @@ class Gui(QMainWindow):
         new_action.triggered.connect(self.new_tree)
         
         file.addAction(save_action)
+        file.addAction(save_as_action)
         file.addAction(open_action)
         file.addAction(new_action)
 
@@ -484,15 +490,23 @@ class Gui(QMainWindow):
             to_add.pop(0)
 
     def save_tree(self):
+        if self.filepath:
+            FileManager.save_data(self.main_group, filepath=self.filepath)
+        else:
+            self.save_as_tree()
+
+    def save_as_tree(self):
         filepath, _ = QFileDialog.getSaveFileName(parent=self, caption="Save To-do List", directory="", filter="Lists (*.pkl);;All Files (*)")
         if filepath:
             FileManager.save_data(self.main_group, filepath=filepath)
+            self.filepath = filepath
 
     def open_tree(self):
         filepath, _ = QFileDialog.getOpenFileName(parent=self, caption="Open To-do List", directory="", filter="Lists (*.pkl);;All Files (*)")
         if filepath:
             self.main_group = FileManager.load_data(filepath=filepath)
             self.update_display()
+            self.filepath = filepath
 
     def new_tree(self):
 
@@ -512,6 +526,7 @@ class Gui(QMainWindow):
 
         self.main_group = Group("Top Level Item")
         self.update_display()
+        self.filepath = None
 
     def remove_item(self, parent, item_to_remove):
         
