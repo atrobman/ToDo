@@ -365,7 +365,23 @@ class Gui(QMainWindow):
             self.app.setStyleSheet(stream.readAll())
             
     def close_app(self):
-        self.close()
+        
+        def popup_clicked(i):
+            if i.text().lower() == "&yes":
+                self.close()
+                self.update_display()
+
+                if self.filepath:
+                    self.save_tree()
+
+        msg = QMessageBox()
+        msg.setWindowTitle("Delete")
+        msg.setText("Would you like to close the program?")
+        msg.setIcon(QMessageBox.Question)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg.setDefaultButton(QMessageBox.No)
+        msg.buttonClicked.connect(popup_clicked)
+        msg.exec_()
 
     def createContextMenu(self, point):
 
@@ -540,6 +556,9 @@ class Gui(QMainWindow):
                 parent.remove_child(item_to_remove)
                 self.update_display()
 
+                if self.filepath:
+                    self.save_tree()
+
         msg = QMessageBox()
         msg.setWindowTitle("Delete")
         msg.setText("Would you like to delete this item?")
@@ -563,6 +582,9 @@ class Gui(QMainWindow):
             parent.add_child(new_group)
             self.update_display()
 
+            if self.filepath:
+                self.save_tree()
+
         dialog.deleteLater()
     
     def add_task(self, parent):
@@ -583,6 +605,9 @@ class Gui(QMainWindow):
             parent.add_child(new_task)
             self.update_display()
 
+            if self.filepath:
+                self.save_tree()
+
         dialog.deleteLater()
 
     def edit_group(self, group_to_edit):
@@ -598,6 +623,9 @@ class Gui(QMainWindow):
             group_to_edit.description = dialog.desc_lineEdit.text()
 
             self.update_display()
+
+            if self.filepath:
+                self.save_tree()
 
         dialog.deleteLater()
 
@@ -620,6 +648,9 @@ class Gui(QMainWindow):
             task_to_edit.difficulty = dialog.difficulty_comboBox.currentIndex() + 1
 
             self.update_display()
+
+            if self.filepath:
+                self.save_tree()
 
         dialog.deleteLater()
 
@@ -658,3 +689,6 @@ class Gui(QMainWindow):
             parent.remove_child(item_to_move)
             new_parent.add_child(item_to_move)
             self.update_display()
+
+            if self.filepath:
+                self.save_tree()
